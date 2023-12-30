@@ -16,18 +16,29 @@ def run_webdriver(): # Main Selenium runner
     options.add_experimental_option('detach', True)  # Keep browser alive
     options.add_argument('--start-maximized') # Full window
     driver=webdriver.Chrome(options=options)
-    driver.get('https://ticketplus.com.tw/order/27239b49272e4517a238cd3d3ffc0d72/523e9f9418f9b03352b847193a82fca9')
+    driver.get('https://ticketplus.com.tw/order/734b25d12322e6970c83bd47578dd64e/af7954c5356feecde2694da7873db2b0')
     #print("Before", confirm_button_pressed)
     #login_notice_enter()
     #print("After", confirm_button_pressed)
     #time.sleep(0.5)
     #if confirm_button_pressed:
-    login()
+    #login()
     #else:
     #    print("Failed")
     #select_ticket()
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-    press_plus_button()
+    #driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+    
+    #zx add
+    target = find_element_by_keyword(driver, "確定")
+    print(target)
+    #element = driver.find_element(By.XPATH, "v-btn v-btn--block v-btn--is-elevated v-btn--has-bg theme--light v-size--default primary")
+    #press_button(element)
+
+    topEle = get_top_level_element_name(driver, target)
+    print(topEle)
+    press_button(driver, topEle)
+
+    #press_plus_button()
 
 
 def login_notice_enter(): # Press confirm button
@@ -96,6 +107,41 @@ def press_plus_button(): # Press button to add the amount of tickets you want to
                 print("No ticket to buy.")
     else:
         print("Not show")
+
+#zx add
+def press_button(driver, eleName):
+    # 使用顯式等待等待元素出現
+    wait = WebDriverWait(driver, 10)
+    button = wait.until(EC.presence_of_element_located((By.CLASS_NAME, eleName)))
+    button.click()
+
+#zx add
+def find_element_by_keyword(driver, keyword):    
+    try:
+        # 使用 XPath 表達式定位元素，這裡假設要找包含特定關鍵字的元素
+        xpath_expression = f"//*[contains(text(), '{keyword}')]"
+
+        # 使用顯式等待等待元素出現
+        wait = WebDriverWait(driver, 10)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, xpath_expression)))
+        #element = driver.find_element(By.XPATH, xpath_expression)
+
+        # 獲取元素的 class name
+        class_name = element.get_attribute("class")
+        return class_name
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+    
+#zx add
+def get_top_level_element_name(driver, eleName):
+    # 使用 XPath 定位 <button> 元素
+    button_element = driver.find_element(By.XPATH, "//button[.//span[@class='"+eleName+"']]")
+
+    # 獲取 <button> 元素的 class
+    button_class = button_element.get_attribute("class")
+
+    return button_class
     
 if __name__ == '__main__':
     before = datetime.datetime.now()
